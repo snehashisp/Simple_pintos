@@ -81,6 +81,7 @@ main (void)
   /* Clear BSS. */  
   bss_init ();
 
+  list_init(&resume_list);
   /* Break command line into arguments and parse options. */
   argv = read_command_line ();
   argv = parse_options (argv);
@@ -93,7 +94,8 @@ main (void)
   /* Greet user. */
   printf ("Pintos booting with %'"PRIu32" kB RAM...\n",
           init_ram_pages * PGSIZE / 1024);
-
+	
+  printf("Hello This is Snehashis from IIITH\n");
   /* Initialize memory system. */
   palloc_init (user_page_limit);
   malloc_init ();

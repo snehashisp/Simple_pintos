@@ -138,6 +138,14 @@ thread_tick (void)
   if (++thread_ticks >= TIME_SLICE)
     intr_yield_on_return ();
 }
+//Snehashis : A function to compare twe resume times
+bool resume_time_func(const struct list_elem *a,const struct list_elem *b,void *aux) {
+
+	struct thread *ta = list_entry(a,struct thread,elem);
+	struct thread *tb = list_entry(b,struct thread,elem);
+	if(ta->wake_up_time < tb->wake_up_time) return true;
+	else return false;
+}
 
 /* Prints thread statistics. */
 void
@@ -563,6 +571,7 @@ schedule (void)
   if (cur != next)
     prev = switch_threads (cur, next);
   thread_schedule_tail (prev);
+  //intr_enable();
 }
 
 /* Returns a tid to use for a new thread. */

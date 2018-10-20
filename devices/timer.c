@@ -86,14 +86,24 @@ timer_elapsed (int64_t then)
 
 /* Sleeps for approximately TICKS timer ticks.  Interrupts must
    be turned on. */
+// Snehashis: modified to prevent busy
 void
 timer_sleep (int64_t ticks) 
 {
-  int64_t start = timer_ticks ();
+	int64_t start = timer_ticks();
+	struct thread *ct = thread_current();
+	ct->wake_up_time = start + ticks;
+	printf("Wake up timer set %d \n",ct->wake_up_time);
+	enum intr_level old = intr_disable();
+	list_insert_ordered(&resume_list,&(ct->elem),resume_time_func,NULL);	
+	thread_block();
+	intr_set_level(old);
 
-  ASSERT (intr_get_level () == INTR_ON);
-  while (timer_elapsed (start) < ticks) 
-    thread_yield ();
+	/*Old Busy wait
+	ASSERT (intr_get_level () == INTR_ON);
+	while (timer_elapsed (start) < ticks) 
+	thread_yield ();
+	*/
 }
 
 /* Sleeps for approximately MS milliseconds.  Interrupts must be
@@ -171,6 +181,23 @@ static void
 timer_interrupt (struct intr_frame *args UNUSED)
 {
   ticks++;
+
+  if(!list_empty(&resume_list)) {
+	
+	  //printf("Block queue %d\n",list_size(&resume_list));
+	  struct list_elem *e = list_front(&resume_list);
+	  struct thread *th = list_entry(e,struct thread,elem);
+	  while(!list_empty(&resume_list) && th->wake_up_time <= ticks) {
+		printf("Thread with wake timer %d \n",th->wake_up_time);
+		list_pop_front(&resume_list);
+		//th = list_entry(e,struct thread,elem);
+		thread_unblock(th);
+		if(list_empty(&resume_list)) break;
+		e = list_front(&resume_list);
+		th = list_entry(e,struct thread,elem);
+	  }
+  }
+		
   thread_tick ();
 }
 

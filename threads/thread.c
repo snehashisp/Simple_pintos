@@ -135,8 +135,8 @@ thread_tick (void)
     kernel_ticks++;
 
   /* Enforce preemption. */
-  if (++thread_ticks >= TIME_SLICE)
-    intr_yield_on_return ();
+  if (++thread_ticks >= TIME_SLICE);
+    //intr_yield_on_return ();
 }
 //Snehashis : A function to compare twe resume times
 bool resume_time_func(const struct list_elem *a,const struct list_elem *b,void *aux) {
@@ -144,6 +144,15 @@ bool resume_time_func(const struct list_elem *a,const struct list_elem *b,void *
 	struct thread *ta = list_entry(a,struct thread,elem);
 	struct thread *tb = list_entry(b,struct thread,elem);
 	if(ta->wake_up_time < tb->wake_up_time) return true;
+	else return false;
+}
+
+//Snehashis : A priority comparitor for ready queues
+bool prio_comp(const struct list_elem *a,const struct list_elem *b,void *aux) {
+
+	struct thread *ta = list_entry(a,struct thread,elem);
+	struct thread *tb = list_entry(b,struct thread,elem);
+	if(ta->priority > tb->priority) return true;
 	else return false;
 }
 
@@ -245,7 +254,9 @@ thread_unblock (struct thread *t)
 
   old_level = intr_disable ();
   ASSERT (t->status == THREAD_BLOCKED);
-  list_push_back (&ready_list, &t->elem);
+  //Snehashis : Made ready queue into a priority queue
+  //list_push_back(&ready_list,&t->elem);
+  list_insert_ordered (&ready_list, &t->elem, prio_comp, NULL);
   t->status = THREAD_READY;
   intr_set_level (old_level);
 }
@@ -315,8 +326,11 @@ thread_yield (void)
   ASSERT (!intr_context ());
 
   old_level = intr_disable ();
-  if (cur != idle_thread) 
-    list_push_back (&ready_list, &cur->elem);
+  if (cur != idle_thread) {	
+   //Snehashis : Made ready queue to a priority queue
+   // list_push_back(&ready_list,&cur->elem);
+   list_insert_ordered(&ready_list, &cur->elem,prio_comp,NULL);
+  }
   cur->status = THREAD_READY;
   schedule ();
   intr_set_level (old_level);
@@ -344,6 +358,9 @@ void
 thread_set_priority (int new_priority) 
 {
   thread_current ()->priority = new_priority;
+  //Snehashis : Added line to yeild lower priority thread
+  if(new_priority < (list_entry(list_front(&ready_list),struct thread,elem)->priority))
+	  thread_yield();
 }
 
 /* Returns the current thread's priority. */

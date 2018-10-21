@@ -91,6 +91,8 @@ void
 timer_sleep (int64_t ticks) 
 {
 	int64_t start = timer_ticks();
+	
+	//Snehashis : Timer wait list implementation
 	struct thread *ct = thread_current();
 	ct->wake_up_time = start + ticks;
 	printf("Wake up timer set %d \n",ct->wake_up_time);
@@ -98,12 +100,13 @@ timer_sleep (int64_t ticks)
 	list_insert_ordered(&resume_list,&(ct->elem),resume_time_func,NULL);	
 	thread_block();
 	intr_set_level(old);
-
+	
 	/*Old Busy wait
 	ASSERT (intr_get_level () == INTR_ON);
 	while (timer_elapsed (start) < ticks) 
 	thread_yield ();
 	*/
+	
 }
 
 /* Sleeps for approximately MS milliseconds.  Interrupts must be
@@ -182,6 +185,7 @@ timer_interrupt (struct intr_frame *args UNUSED)
 {
   ticks++;
 
+  //Snehashis : Timer without semaphore   
   if(!list_empty(&resume_list)) {
 	
 	  //printf("Block queue %d\n",list_size(&resume_list));
@@ -197,7 +201,7 @@ timer_interrupt (struct intr_frame *args UNUSED)
 		th = list_entry(e,struct thread,elem);
 	  }
   }
-		
+	
   thread_tick ();
 }
 

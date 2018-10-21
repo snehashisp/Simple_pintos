@@ -95,7 +95,7 @@ timer_sleep (int64_t ticks)
 	//Snehashis : Timer wait list implementation
 	struct thread *ct = thread_current();
 	ct->wake_up_time = start + ticks;
-	printf("Wake up timer set %d \n",ct->wake_up_time);
+//	printf("Wake up timer set %d \n",ct->wake_up_time);
 	enum intr_level old = intr_disable();
 	list_insert_ordered(&resume_list,&(ct->elem),resume_time_func,NULL);	
 	thread_block();
@@ -192,7 +192,7 @@ timer_interrupt (struct intr_frame *args UNUSED)
 	  struct list_elem *e = list_front(&resume_list);
 	  struct thread *th = list_entry(e,struct thread,elem);
 	  while(!list_empty(&resume_list) && th->wake_up_time <= ticks) {
-		printf("Thread with wake timer %d \n",th->wake_up_time);
+//		printf("Thread with wake timer %d \n",th->wake_up_time);
 		list_pop_front(&resume_list);
 		//th = list_entry(e,struct thread,elem);
 		thread_unblock(th);

@@ -118,6 +118,8 @@ extern bool thread_mlfqs;
 struct list resume_list;
 //Snehashis : Function to compare two resume times
 bool resume_time_func(const struct list_elem *,const struct list_elem *,void *);
+//Snehashis : Function to compare between two priority list
+bool prio_comp(const struct list_elem *,const struct list_elem *,void *);
 
 void thread_init (void);
 void thread_start (void);

@@ -136,7 +136,7 @@ thread_tick (void)
 
   /* Enforce preemption. */
   if (++thread_ticks >= TIME_SLICE);
-    //intr_yield_on_return ();
+    intr_yield_on_return ();
 }
 //Snehashis : A function to compare twe resume times
 bool resume_time_func(const struct list_elem *a,const struct list_elem *b,void *aux) {
@@ -359,7 +359,7 @@ thread_set_priority (int new_priority)
 {
   thread_current ()->priority = new_priority;
   //Snehashis : Added line to yeild lower priority thread
-  if(new_priority < (list_entry(list_front(&ready_list),struct thread,elem)->priority))
+  if(!list_empty(&ready_list) && new_priority < (list_entry(list_front(&ready_list),struct thread,elem)->priority))
 	  thread_yield();
 }
 
